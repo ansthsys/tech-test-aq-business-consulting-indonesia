@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use BadMethodCallException;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -58,8 +59,9 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        if ($request->wantsJson()) {
-            return $this->handleApiException($request, $exception);
+        return $this->handleApiException($request, $exception);
+        die();
+        if ($request->wantsJson() || $request->is("api*")) {
         } else {
             $retval = parent::render($request, $exception);
         }
@@ -85,7 +87,7 @@ class Handler extends ExceptionHandler
                 'success' => false,
                 'message' => 'Validation error',
                 'status' => '400',
-                'errors' => $this->convertValidationExceptionToResponse($exception, $request),
+                'errors' => $exception->errors(),
             ], 400);
         }
 
@@ -122,6 +124,14 @@ class Handler extends ExceptionHandler
         }
 
         if ($exception instanceof NotFoundHttpException) {
+            return response()->json([
+                'success' => 0,
+                'message' => 'This Resource is not found',
+                'status' => '404',
+            ], 404);
+        }
+
+        if ($exception instanceof ModelNotFoundException) {
             return response()->json([
                 'success' => 0,
                 'message' => 'This Resource is not found',
