@@ -62,8 +62,23 @@ async function handlerStatus(id) {
   }
 }
 
-function handlerEditable(item) {
-  item.editable = !item.editable;
+async function handlerEditable(id) {
+  try {
+    response.isLoading = true;
+
+    const current = response?.data?.find((item) => item.id === id);
+    const payload = { title: current.title, completed: current.completed };
+    const { data } = await axios.patch(
+      `/todo-list/${id}`,
+      JSON.stringify(payload)
+    );
+    console.log(data);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    response.isLoading = false;
+    fetchTodoList();
+  }
 }
 
 async function handlerDelete(id) {
@@ -181,7 +196,4 @@ async function handlerSubmit(e) {
   </div>
 </template>
 
-<style scoped>
-.completed {
-}
-</style>
+<style scoped></style>

@@ -1,8 +1,9 @@
 <script setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { TrashIcon } from "@heroicons/vue/24/solid";
+import contenteditable from "vue-contenteditable";
 
-const { item } = defineProps([
+const props = defineProps([
   "item",
   "isLoading",
   "handlerStatus",
@@ -10,17 +11,19 @@ const { item } = defineProps([
   "handlerDelete",
 ]);
 
+const elementTitle = ref(null);
+
 const classCard = computed(() => {
   return {
-    "bg-base-100": item.completed == false,
-    "bg-zinc-300": item.completed == true,
+    "bg-base-100": props.item.completed == false,
+    "bg-zinc-300": props.item.completed == true,
   };
 });
 
 const classTitle = computed(() => {
   return {
-    "line-through": item.completed == true,
-    "text-decoration-none": item.completed == false,
+    "line-through": props.item.completed == true,
+    "text-decoration-none": props.item.completed == false,
   };
 });
 </script>
@@ -34,27 +37,31 @@ const classTitle = computed(() => {
       <input
         type="checkbox"
         class="checkbox checkbox-lg border-2"
-        @click="handlerStatus(item.id)"
-        :checked="item.completed"
+        @click="handlerStatus(props.item.id)"
+        :checked="props.item.completed"
       />
     </div>
-    <div class="card-body flex-1 cursor-pointer" title="Edit ToDo! ini">
-      <h1
-        class="card-title break-words break-all line-clamp-4"
+    <div class="card-body flex-1">
+      <contenteditable
+        ref="elementTitle"
+        tag="h1"
+        title="Edit ToDo! ini"
+        class="card-title text-2xl break-words break-all line-clamp-4"
         :class="classTitle"
-        @click="handlerEditable(item)"
-        :contenteditable="item.editable"
-        @input="({ target }) => (item.title = target.innerText)"
-        autocorrect="off"
+        :contenteditable="true"
+        v-model="props.item.title"
+        :no-nl="true"
+        :no-html="true"
+        @returned="handlerEditable(props.item?.id)"
+        @blur="handlerEditable(props.item?.id)"
         spellcheck="false"
-      >
-        {{ item.title }}
-      </h1>
+        translate="no"
+      />
     </div>
     <div class="card-body flex-none">
       <button
         class="btn btn-error"
-        @click.prevent="handlerDelete(item.id)"
+        @click.prevent="handlerDelete(props.item.id)"
         :disabled="isLoading"
       >
         <span v-if="isLoading" class="loading loading-spinner"></span>
