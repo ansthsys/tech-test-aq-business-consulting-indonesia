@@ -116,21 +116,9 @@ async function handlerSubmit(e) {
   }
 }
 
-const onEnd = (evt) => {
-  // Remove the moved item from the old position
-  const movedItem = response.data.splice(evt.oldIndex, 1)[0];
-
-  // Insert the moved item at the new position
-  response.data.splice(evt.newIndex, 0, movedItem);
-
-  // Update the order values for all items based on their new positions
-  response.data.forEach((item, index) => {
-    item.order = index; // Set the order value to match the new index
-  });
-
-  // Now update the database with the new order values
-  console.log(response.data);
-};
+function onEnd(evt) {
+  console.log(response.data, evt);
+}
 </script>
 
 <template>
