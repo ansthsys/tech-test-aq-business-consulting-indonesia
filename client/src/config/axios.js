@@ -4,6 +4,7 @@ export default axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: {
     Accept: "application/json",
-    Authorization: localStorage.get(token),
+    "Content-Type": "application/json",
+    Authorization: localStorage.getItem("token"),
   },
 });
