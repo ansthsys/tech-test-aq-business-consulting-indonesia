@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref, reactive } from "vue";
 import { PlusIcon } from "@heroicons/vue/24/solid";
+import { VueDraggableNext } from "vue-draggable-next";
 import axios from "@/config/axios";
 import TextInput from "@/components/TextInput.vue";
 import ButtonLoader from "@/components/ButtonLoader.vue";
@@ -32,7 +33,14 @@ async function fetchTodoList() {
       },
     });
 
-    response.data = data?.data?.map((item) => ({ ...item, editable: false }));
+    const array = [...data?.data];
+    const reversedArray = [...data?.data].reverse();
+
+    array.forEach((item, index) => {
+      item.order = reversedArray[index].order;
+    });
+
+    response.data = array.map((item) => ({ ...item, editable: false }));
   } catch (err) {
     console.error(err);
   } finally {
@@ -72,7 +80,6 @@ async function handlerEditable(id) {
       `/todo-list/${id}`,
       JSON.stringify(payload)
     );
-    console.log(data);
   } catch (err) {
     console.error(err);
   } finally {
@@ -108,6 +115,22 @@ async function handlerSubmit(e) {
     fetchTodoList();
   }
 }
+
+const onEnd = (evt) => {
+  // Remove the moved item from the old position
+  const movedItem = response.data.splice(evt.oldIndex, 1)[0];
+
+  // Insert the moved item at the new position
+  response.data.splice(evt.newIndex, 0, movedItem);
+
+  // Update the order values for all items based on their new positions
+  response.data.forEach((item, index) => {
+    item.order = index; // Set the order value to match the new index
+  });
+
+  // Now update the database with the new order values
+  console.log(response.data);
+};
 </script>
 
 <template>
@@ -159,19 +182,22 @@ async function handlerSubmit(e) {
         <div class="card-body">
           <h2 class="text-2xl font-bold mb-5">Daftar ToDo!</h2>
 
-          <template
+          <VueDraggableNext
             v-if="response?.data?.length > 0"
-            v-for="(item, idx) in response?.data"
-            :key="idx"
+            :list="response.data"
+            @change="(e) => console.log(e)"
+            @end="onEnd"
           >
-            <TodoItem
-              :item="item"
-              :is-loading="response.isLoading"
-              :handler-status="handlerStatus"
-              :handler-editable="handlerEditable"
-              :handler-delete="handlerDelete"
-            />
-          </template>
+            <template v-for="(element, idx) in response.data" :key="idx">
+              <TodoItem
+                :item="element"
+                :is-loading="response.isLoading"
+                :handler-status="handlerStatus"
+                :handler-editable="handlerEditable"
+                :handler-delete="handlerDelete"
+              />
+            </template>
+          </VueDraggableNext>
           <div
             v-else
             class="card card-compact flex-row items-center bg-base-100 shadow-md mb-5 py-5"
@@ -196,4 +222,9 @@ async function handlerSubmit(e) {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.ghost {
+  opacity: 0.5;
+  background: #c8ebfb;
+}
+</style>
