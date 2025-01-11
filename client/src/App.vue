@@ -12,11 +12,7 @@ const { verifyToken } = useAuthStore();
 onMounted(() => {
   verifyToken();
 
-  console.log(isAuthenticated.value);
-
   router.beforeEach((to, from, next) => {
-    console.log(to.meta.requiresAuth, to.meta.requiresGues)
-    console.log(to.meta.requiresAuth && !isAuthenticated.value)
     if (to.meta.requireAuth && !isAuthenticated.value) {
       next({ name: "login" });
     } else {

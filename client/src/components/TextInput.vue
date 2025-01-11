@@ -10,14 +10,14 @@ const props = defineProps([
 </script>
 
 <template>
-  <label class="form-control w-full max-w-xs">
+  <label class="form-control w-full max-w-sm">
     <div class="label">
       <span class="label-text">{{ props.label }}</span>
     </div>
     <input
       :type="props.type"
       :placeholder="props.placeholder"
-      class="input input-bordered w-full max-w-xs bg-base-100"
+      class="input input-bordered w-full max-w-sm bg-base-100"
       v-model="props.reactiveState[props.name]"
     />
     <div

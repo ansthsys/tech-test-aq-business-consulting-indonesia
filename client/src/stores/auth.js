@@ -15,8 +15,13 @@ export const useAuthStore = defineStore("auth", () => {
       if (decodedToken.exp > Date.now() / 1000) {
         isAuthenticated.value = true;
         dataToken.value = decodedToken;
+        return true;
       }
+
+      return false;
     }
+
+    return false;
   }
 
   function revokeToken() {
